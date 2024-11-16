@@ -17,7 +17,8 @@
 
 // CountDown Timer
 let singleTimer = 90; // 90 seconds
-let score = 0;
+let scoreA = 0;
+let scoreB = 0;
 
 //Title screen
 let gameState = "title";
@@ -44,8 +45,48 @@ const singleFrog = {
     }
 };
 
+//multiple frogs
+// Frog A
+const frogA = {
+    // The frog's body has a position and size
+    body: {
+        x: 250,
+        y: 1000,
+        size: 300
+    },
+    // The frog's tongue has a position, size, speed, and state
+    tongue: {
+        x: undefined,
+        y: 1000,
+        size: 40,
+        speed: 20,
+        // Determines how the tongue moves each frame
+        state: "idle" // State can be: idle, outbound, inbound
+    }
+};
+
+// Frog B
+const frogB = {
+    // The frog's body has a position and size
+    body: {
+        x: 750,
+        y: 1000,
+        size: 300
+    },
+    // The frog's tongue has a position, size, speed, and state
+    tongue: {
+        x: undefined,
+        y: 1000,
+        size: 40,
+        speed: 20,
+        // Determines how the tongue moves each frame
+        state: "idle" // State can be: idle, outbound, inbound
+    }
+};
+
 // Our bugs
 // Have a position, size, and speed of horizontal movement
+
 const fly = {
     x: 0,
     y: 200, // Will be random
@@ -93,8 +134,9 @@ const illFly = {
 /**
  * Creates the canvas and initializes the fly
  */
+
 function setup() {
-    createCanvas(1000, 1000);
+    createCanvas(2000, 1000);
 
     // Give the fly its first random position
     resetFly();
@@ -105,7 +147,6 @@ function setup() {
             decrementTimer();
         }
     }, 1000);
-
 }
 
 /**
@@ -124,7 +165,14 @@ function draw() {
         //Basic instructions of the game
         drawSingleInstructions();
 
+    } else if (gameState === "multiInstructions") {
+        //Basic instructions of the game
+        drawMultiInstructions();
+
     } else if (gameState === "rules") {
+        //Display types of flies
+        drawTypesOfFlies();
+    } else if (gameState === "rules2") {
         //Display types of flies
         drawTypesOfFlies();
 
@@ -135,6 +183,9 @@ function draw() {
     } else if (gameState === "game") {
         //Game screen
         drawGameScreen();
+    } else if (gameState === "game2") {
+        //Game screen
+        drawGame2Screen();
     }
 }
 
@@ -164,11 +215,34 @@ function drawGameScreen() {
 
     moveBug();
     drawBug();
-    moveFrog();
-    moveTongue();
-    drawFrog();
+    moveSingleFrog();
+    moveSingleTongue();
+    drawSingleFrog();
     tongueOverlap();
     drawScore();
+    drawTimer();
+}
+
+//Multiplayer game screen
+function drawGame2Screen() {
+    background("#87ceeb");
+    push();
+    fill(0, 0, 0);
+    textSize(20);
+    text("Press ESCAPE to go back and pause", 320, 50);
+    pop();
+
+    moveBug();
+    drawBug();
+    moveMultiFrogA();
+    moveMultiFrogB();
+    moveMultiTongueA();
+    moveMultiTongueB();
+    drawMultiFrogA();
+    drawMultiFrogB();
+    tongueOverlap();
+    drawScoreA();
+    drawScoreB();
     drawTimer();
 }
 
@@ -222,6 +296,24 @@ function drawSingleInstructions() {
     text("Press ENTER to continue", width / 2, height / 2 + 50);
     text("Press ESCAPE to go back", width / 2, height / 2 + 100);
     text("Press SHIFT to see the scoreboard", width / 2, height / 2 + 150);
+    pop();
+}
+
+//Multiplayer instructions screen
+function drawMultiInstructions() {
+    push();
+    background(25, 120, 11);
+    textAlign(CENTER, CENTER);
+    textSize(50);
+    fill("#000000");
+    text("Instructions", width / 2, height / 2 - 200);
+    textSize(30);
+    text("Move the red frog with 'A' and 'D'", width / 2, height / 2 - 150);
+    text("Move the Blue frog with 'LArrow' and 'RArrow'", width / 2, height / 2 - 100);
+    text("Red frog. catch the flies with your tongue by using 'W'", width / 2, height / 2 - 50);
+    text("Blue frog. catch the flies with your tongue by using 'upArrow'", width / 2, height / 2);
+    text("Press ENTER to continue", width / 2, height / 2 + 50);
+    text("Press ESCAPE to go back", width / 2, height / 2 + 100);
     pop();
 }
 
@@ -472,7 +564,7 @@ function resetIllFly() {
 /**
  * Moves the frog with "A" and "D" on the x position
  */
-function moveFrog() {
+function moveSingleFrog() {
     if (keyIsDown(65)) { // 'A' key
         singleFrog.body.x = max(singleFrog.body.x - 10, 0);
     }
@@ -482,9 +574,32 @@ function moveFrog() {
 }
 
 /**
+ * Moves the frogA with "A" and "D" on the x position
+ */
+function moveMultiFrogA() {
+    if (keyIsDown(65)) { // 'A' key
+        frogA.body.x = max(frogA.body.x - 10, 0);
+    }
+    if (keyIsDown(68)) { // 'D' key
+        frogA.body.x = min(frogA.body.x + 10, width);
+    }
+}
+
+/*
+ * Moves the frogB with "LeftArrow" and "RightArrow" on the x position
+ */
+function moveMultiFrogA() {
+    if (keyIsDown(LEFT_ARROW)) { // 'LeftArrow' key
+        frogB.body.x = max(frogB.body.x - 10, 0);
+    }
+    if (keyIsDown(RIGHT_ARROW)) { // 'RightArrow' key
+        frogB.body.x = min(frogB.body.x + 10, width);
+    }
+}
+/*
  * Handles moving the tongue based on its state
  */
-function moveTongue() {
+function moveSingleTongue() {
     // Tongue matches the frog's x
     singleFrog.tongue.x = singleFrog.body.x;
     // If the tongue is idle, it doesn't do anything
@@ -510,9 +625,63 @@ function moveTongue() {
 }
 
 /**
+ * Handles moving the tongue of frog A based on its state
+ */
+function moveMultiTongueA() {
+    // Tongue matches the frog's x
+    frogA.tongue.x = frogA.body.x;
+    // If the tongue is idle, it doesn't do anything
+    if (frogA.tongue.state === "idle") {
+        // Do nothing
+    }
+    // If the tongue is outbound, it moves up
+    else if (frogA.tongue.state === "outbound") {
+        frogA.tongue.y += -frogA.tongue.speed;
+        // The tongue bounces back if it hits the top
+        if (frogA.tongue.y <= 0) {
+            frogA.tongue.state = "inbound";
+        }
+    }
+    // If the tongue is inbound, it moves down
+    else if (frogA.tongue.state === "inbound") {
+        frogA.tongue.y += frogA.tongue.speed;
+        // The tongue stops if it hits the bottom
+        if (frogA.tongue.y >= height) {
+            frogA.tongue.state = "idle";
+        }
+    }
+}
+/**
+ * Handles moving the tongue of frog B based on its state
+ */
+function moveMultiTongueB() {
+    // Tongue matches the frog's x
+    frogB.tongue.x = frogB.body.x;
+    // If the tongue is idle, it doesn't do anything
+    if (frogB.tongue.state === "idle") {
+        // Do nothing
+    }
+    // If the tongue is outbound, it moves up
+    else if (frogB.tongue.state === "outbound") {
+        frogB.tongue.y += -frogB.tongue.speed;
+        // The tongue bounces back if it hits the top
+        if (frogB.tongue.y <= 0) {
+            frogB.tongue.state = "inbound";
+        }
+    }
+    // If the tongue is inbound, it moves down
+    else if (frogB.tongue.state === "inbound") {
+        frogB.tongue.y += frogB.tongue.speed;
+        // The tongue stops if it hits the bottom
+        if (frogB.tongue.y >= height) {
+            frogB.tongue.state = "idle";
+        }
+    }
+}
+/**
  * Displays the tongue (tip and line connection) and the frog (body)
  */
-function drawFrog() {
+function drawSingleFrog() {
     // Draw the tongue tip
     push();
     fill("#ff0000");
@@ -536,66 +705,184 @@ function drawFrog() {
 }
 
 /**
+ * Draws the two multiplayer frogs
+ */
+function drawMultiFrogA() {
+    // Draw the tongue tip
+    push();
+    fill(163, 21, 21);
+    noStroke();
+    ellipse(frogA.tongue.x, frogA.tongue.y, frogA.tongue.size);
+    pop();
+
+    // Draw the rest of the tongue
+    push();
+    stroke("#ff0000");
+    strokeWeight(frogA.tongue.size);
+    line(frogA.tongue.x, frogA.tongue.y, sfrogA.body.x, frogA.body.y);
+    pop();
+    line(frogA.tongue.x, frogA.tongue.y, frogA.body.x, frogA.body.y);
+
+    // Draw the frog's body
+    push();
+    fill("#00ff00");
+    noStroke();
+    ellipse(frogA.body.x, frogA.body.y, frogA.body.size);
+    pop();
+}
+
+function drawMultiFrogB() {
+    // Draw the tongue tip
+    push();
+    fill(23, 37, 156);
+    noStroke();
+    ellipse(frogB.tongue.x, frogB.tongue.y, frogB.tongue.size);
+    pop();
+
+    // Draw the rest of the tongue
+    push();
+    stroke("#ff0000");
+    strokeWeight(frogA.tongue.size);
+    line(frogB.tongue.x, frogB.tongue.y, sfrogA.body.x, frogB.body.y);
+    pop();
+    line(frogB.tongue.x, frogB.tongue.y, frogB.body.x, frogB.body.y);
+    // Draw the frog's body
+    push();
+    fill("#00ff00");
+    noStroke();
+    ellipse(frogB.body.x, frogB.body.y, frogB.body.size);
+    pop();
+}
+
+/**
  * Handles the tongue overlapping the bugs
  */
 function checkTongueFlyOverlap() {
-    // Get distance from tongue to fly
-    const d = dist(singleFrog.tongue.x, singleFrog.tongue.y, fly.x, fly.y);
-    // Check if it's an overlap
-    const eaten = (d < singleFrog.tongue.size / 2 + fly.size / 2);
+    // Check overlap for single frog
+    let d = dist(singleFrog.tongue.x, singleFrog.tongue.y, fly.x, fly.y);
+    let eaten = (d < singleFrog.tongue.size / 2 + fly.size / 2);
     if (eaten) {
-        // Reset the fly
         resetFly();
-        // Bring back the tongue
         singleFrog.tongue.state = "inbound";
-        // Increment the score
-        score++;
+        singleScore++;
+    }
+
+    // Check overlap for frog A
+    d = dist(frogA.tongue.x, frogA.tongue.y, fly.x, fly.y);
+    eaten = (d < frogA.tongue.size / 2 + fly.size / 2);
+    if (eaten) {
+        resetFly();
+        frogA.tongue.state = "inbound";
+        scoreA++;
+    }
+
+    // Check overlap for frog B
+    d = dist(frogB.tongue.x, frogB.tongue.y, fly.x, fly.y);
+    eaten = (d < frogB.tongue.size / 2 + fly.size / 2);
+    if (eaten) {
+        resetFly();
+        frogB.tongue.state = "inbound";
+        scoreB++;
     }
 }
 
 function checkTongueFireflyOverlap() {
-    // Get distance from tongue to firefly
-    const d = dist(singleFrog.tongue.x, singleFrog.tongue.y, firefly.x, firefly.y);
-    // Check if it's an overlap
-    const eaten = (d < singleFrog.tongue.size / 2 + firefly.size / 2);
+    // Check overlap for single frog
+    let d = dist(singleFrog.tongue.x, singleFrog.tongue.y, firefly.x, firefly.y);
+    let eaten = (d < singleFrog.tongue.size / 2 + firefly.size / 2);
     if (eaten) {
-        // Reset the firefly
         resetFirefly();
-        // Bring back the tongue
         singleFrog.tongue.state = "inbound";
-        // Decrease the score
-        score--;
+        singleScore--;
+    }
+
+    // Check overlap for frog A
+    d = dist(frogA.tongue.x, frogA.tongue.y, firefly.x, firefly.y);
+    eaten = (d < frogA.tongue.size / 2 + firefly.size / 2);
+    if (eaten) {
+        resetFirefly();
+        frogA.tongue.state = "inbound";
+        scoreA--;
+    }
+
+    // Check overlap for frog B
+    d = dist(frogB.tongue.x, frogB.tongue.y, firefly.x, firefly.y);
+    eaten = (d < frogB.tongue.size / 2 + firefly.size / 2);
+    if (eaten) {
+        resetFirefly();
+        frogB.tongue.state = "inbound";
+        scoreB--;
     }
 }
 
 function checkTongueSpiceyFlyOverlap() {
-    // Get distance from tongue to spicey fly
-    const d = dist(singleFrog.tongue.x, singleFrog.tongue.y, spiceyFly.x, spiceyFly.y);
-    // Check if it's an overlap
-    const eaten = (d < singleFrog.tongue.size / 2 + spiceyFly.size / 2);
+    // Check overlap for single frog
+    let d = dist(singleFrog.tongue.x, singleFrog.tongue.y, spiceyFly.x, spiceyFly.y);
+    let eaten = (d < singleFrog.tongue.size / 2 + spiceyFly.size / 2);
     if (eaten) {
-        // Reset the spicey fly
         resetSpiceyFly();
-        // Bring back the tongue
         singleFrog.tongue.state = "inbound";
-        // Increment the score
-        score += 4;
+        singleScore += 4;
+    }
+
+    // Check overlap for frog A
+    d = dist(frogA.tongue.x, frogA.tongue.y, spiceyFly.x, spiceyFly.y);
+    eaten = (d < frogA.tongue.size / 2 + spiceyFly.size / 2);
+    if (eaten) {
+        resetSpiceyFly();
+        frogA.tongue.state = "inbound";
+        scoreA += 4;
+    }
+
+    // Check overlap for frog B
+    d = dist(frogB.tongue.x, frogB.tongue.y, spiceyFly.x, spiceyFly.y);
+    eaten = (d < frogB.tongue.size / 2 + spiceyFly.size / 2);
+    if (eaten) {
+        resetSpiceyFly();
+        frogB.tongue.state = "inbound";
+        scoreB += 4;
     }
 }
 
 function checkTongueToxicFlyOverlap() {
-    // Get distance from tongue to toxic fly
-    const d = dist(singleFrog.tongue.x, singleFrog.tongue.y, toxicFly.x, toxicFly.y);
-    // Check if it's an overlap
-    const eaten = (d < singleFrog.tongue.size / 2 + toxicFly.size / 2);
+    // Check overlap for single frog
+    let d = dist(singleFrog.tongue.x, singleFrog.tongue.y, toxicFly.x, toxicFly.y);
+    let eaten = (d < singleFrog.tongue.size / 2 + toxicFly.size / 2);
     if (eaten) {
-        // Reset the toxic fly
         resetToxicFly();
-        // Bring back the tongue
         singleFrog.tongue.state = "inbound";
-        // Decrease the score through time
         let decrementInterval = setInterval(() => {
-            score--;
+            singleScore--;
+        }, 700);
+
+        setTimeout(() => {
+            clearInterval(decrementInterval);
+        }, 7000);
+    }
+
+    // Check overlap for frog A
+    d = dist(frogA.tongue.x, frogA.tongue.y, toxicFly.x, toxicFly.y);
+    eaten = (d < frogA.tongue.size / 2 + toxicFly.size / 2);
+    if (eaten) {
+        resetToxicFly();
+        frogA.tongue.state = "inbound";
+        let decrementInterval = setInterval(() => {
+            scoreA--;
+        }, 700);
+
+        setTimeout(() => {
+            clearInterval(decrementInterval);
+        }, 7000);
+    }
+
+    // Check overlap for frog B
+    d = dist(frogB.tongue.x, frogB.tongue.y, toxicFly.x, toxicFly.y);
+    eaten = (d < frogB.tongue.size / 2 + toxicFly.size / 2);
+    if (eaten) {
+        resetToxicFly();
+        frogB.tongue.state = "inbound";
+        let decrementInterval = setInterval(() => {
+            scoreB--;
         }, 700);
 
         setTimeout(() => {
@@ -605,18 +892,44 @@ function checkTongueToxicFlyOverlap() {
 }
 
 function checkTongueMosquitoOverlap() {
-    // Get distance from tongue to mosquito
-    const d = dist(singleFrog.tongue.x, singleFrog.tongue.y, mosquito.x, mosquito.y);
-    // Check if it's an overlap
-    const eaten = (d < singleFrog.tongue.size / 2 + mosquito.size / 2);
+    // Check overlap for single frog
+    let d = dist(singleFrog.tongue.x, singleFrog.tongue.y, mosquito.x, mosquito.y);
+    let eaten = (d < singleFrog.tongue.size / 2 + mosquito.size / 2);
     if (eaten) {
-        // Reset the mosquito
         resetMosquito();
-        // Bring back the tongue
         singleFrog.tongue.state = "inbound";
-        // Increase the score
         let incrementInterval = setInterval(() => {
-            score++;
+            singleScore++;
+        }, 700);
+
+        setTimeout(() => {
+            clearInterval(incrementInterval);
+        }, 7000);
+    }
+
+    // Check overlap for frog A
+    d = dist(frogA.tongue.x, frogA.tongue.y, mosquito.x, mosquito.y);
+    eaten = (d < frogA.tongue.size / 2 + mosquito.size / 2);
+    if (eaten) {
+        resetMosquito();
+        frogA.tongue.state = "inbound";
+        let incrementInterval = setInterval(() => {
+            scoreA++;
+        }, 700);
+
+        setTimeout(() => {
+            clearInterval(incrementInterval);
+        }, 7000);
+    }
+
+    // Check overlap for frog B
+    d = dist(frogB.tongue.x, frogB.tongue.y, mosquito.x, mosquito.y);
+    eaten = (d < frogB.tongue.size / 2 + mosquito.size / 2);
+    if (eaten) {
+        resetMosquito();
+        frogB.tongue.state = "inbound";
+        let incrementInterval = setInterval(() => {
+            scoreB++;
         }, 700);
 
         setTimeout(() => {
@@ -626,26 +939,58 @@ function checkTongueMosquitoOverlap() {
 }
 
 function checkTongueIllFlyOverlap() {
-    // Get distance from tongue to illFly
-    const d = dist(singleFrog.tongue.x, singleFrog.tongue.y, illFly.x, illFly.y);
-    // Check if it's an overlap
-    const eaten = (d < singleFrog.tongue.size / 2 + illFly.size / 2);
+    // Check overlap for single frog
+    let d = dist(singleFrog.tongue.x, singleFrog.tongue.y, illFly.x, illFly.y);
+    let eaten = (d < singleFrog.tongue.size / 2 + illFly.size / 2);
     if (eaten) {
-        // Reset the illFly
         resetIllFly();
-        // Bring back the tongue
         singleFrog.tongue.state = "inbound";
-        // Decrease the score
-        score -= 4;
+        singleScore -= 4;
+    }
+
+    // Check overlap for frog A
+    d = dist(frogA.tongue.x, frogA.tongue.y, illFly.x, illFly.y);
+    eaten = (d < frogA.tongue.size / 2 + illFly.size / 2);
+    if (eaten) {
+        resetIllFly();
+        frogA.tongue.state = "inbound";
+        scoreA -= 4;
+    }
+
+    // Check overlap for frog B
+    d = dist(frogB.tongue.x, frogB.tongue.y, illFly.x, illFly.y);
+    eaten = (d < frogB.tongue.size / 2 + illFly.size / 2);
+    if (eaten) {
+        resetIllFly();
+        frogB.tongue.state = "inbound";
+        scoreB -= 4;
     }
 }
 
-// draws the scoreboad on the top left corner
+// draws the score on the top left corner
 function drawScore() {
     push();
     fill("#000000");
     textSize(40);
-    text("POINTS: " + score, 30, 70);
+    text("POINTS: " + singleScore, 30, 70);
+    pop();
+}
+
+//draws the scoreA on the top left corner
+function drawScoreA() {
+    push();
+    fill("#000000");
+    textSize(40);
+    text("POINTS: " + scoreA, 30, 70);
+    pop();
+}
+
+//draws the scoreB on the top left corner
+function drawScoreB() {
+    push();
+    fill("#000000");
+    textSize(40);
+    text("POINTS: " + scoreB, 30, 100);
     pop();
 }
 
@@ -657,7 +1002,7 @@ function decrementTimer() {
         saveSingleScore();
         gameState = "singleScores";
         singleTimer = 90;
-        score = 0;
+        singleScore = 0;
     }
 }
 
@@ -673,15 +1018,19 @@ function drawTimer() {
 /**
  * Saves the score to local storage
  */
+
+let scoreSaved = false;
+
 function saveSingleScore() {
     let scores = JSON.parse(localStorage.getItem('scores')) || [];
-    scores.push(score);
+    scores.push(singleScore);
     localStorage.setItem('scores', JSON.stringify(scores));
 }
 
 // Save the score when the timer reaches 0
-if (singleTimer === 0) {
+if (singleTimer === 0 && !scoreSaved) {
     saveSingleScore();
+    scoreSaved = true;
 }
 
 /**
@@ -696,6 +1045,8 @@ function keyPressed() {
         gameState = "title";
 
         //sets the gamemode to single player
+    } else if (key === 'w' && frogA.tongue.state === "idle" && gameState === "game2") {
+        frogA.tongue.state = "outbound";
     } else if (keyCode === 83 && gameState === "gamemodes") {
         gameState = "singleInstructions";
     } else if (keyCode === ENTER && gameState === "singleInstructions") {
@@ -704,13 +1055,16 @@ function keyPressed() {
         gameState = "game";
     } else if (keyCode === ESCAPE && gameState === "game") {
         gameState = "title";
+    }
+    //sets the gamemode to multiplayer
 
-        //sets the gamemode to multiplayer
+    if (keyCode === UP_ARROW && frogB.tongue.state === "idle" && gameState === "game2") {
+        frogB.tongue.state = "outbound";
     } else if (keyCode === 77 && gameState === "gamemodes") {
         gameState = "multiInstructions";
     } else if (keyCode === ENTER && gameState === "multiInstructions") {
         gameState = "rules2";
-    } else if (keyCode === ESCAPE && gameState === "rules2") {
+    } else if (keyCode === ENTER && gameState === "rules2") {
         gameState = "game2";
     } else if (keyCode === ESCAPE && gameState === "game2") {
         gameState = "title";
