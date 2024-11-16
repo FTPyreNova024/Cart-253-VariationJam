@@ -16,13 +16,15 @@
 "use strict";
 
 // CountDown Timer
-let timer = 90; // 90 seconds
+let singleTimer = 90; // 90 seconds
+let timer = 90;
+let score = 0;
 
 //Title screen
 let gameState = "title";
 
 //Scoreboard
-let score = 0;
+let singleScore = 0;
 
 // Our frog
 const frog = {
@@ -115,15 +117,19 @@ function draw() {
         //Title screen
         drawTitleScreen();
 
-    } else if (gameState === "instructions") {
-        //Basic instructions of the game
-        drawInstructions();
+    } else if (gameState === "gamemodes") {
+        //draws the gamemode selection screen
+        drawGamemodes();
 
-    } else if (gameState === "flies") {
+    } else if (gameState === "singleInstructions") {
+        //Basic instructions of the game
+        drawSingleInstructions();
+
+    } else if (gameState === "rules") {
         //Display types of flies
         drawTypesOfFlies();
 
-    } else if (gameState === "scores") {
+    } else if (gameState === "singleScores") {
         //Display the scoreboard
         drawScoreBoard();
 
@@ -132,7 +138,22 @@ function draw() {
         drawGameScreen();
     }
 }
-//Game screen
+
+//Draws the gamemode selection screen
+function drawGamemodes() {
+    push();
+    background(25, 120, 11);
+    textAlign(CENTER, CENTER);
+    textSize(50);
+    fill("#000000");
+    text("Choose a gamemode", width / 2, height / 2 - 200);
+    textSize(30);
+    text("Single player: Press 'S'", width / 2, height / 2 - 100);
+    text("Multiplayer: Press 'M'", width / 2, height / 2 - 50);
+    pop();
+}
+
+//Single player game screen
 function drawGameScreen() {
     background("#87ceeb");
     push();
@@ -160,13 +181,11 @@ function drawTitleScreen() {
     fill("#000000");
     text("Frogfrogfrog", width / 2, height / 2 - 100);
     textSize(30);
-    text("Press ENTER to Start", width / 2, height / 2);
-    textSize(30);
-    text("Press SHIFT to see the scores", width / 2, height / 2 + 100);
+    text("Press ENTER to choose gamemode", width / 2, height / 2);
     pop();
 }
 
-//Scoreboard screen
+//Single player scoreboard screen
 function drawScoreBoard() {
     push();
     background(25, 120, 11);
@@ -189,8 +208,8 @@ function drawScoreBoard() {
     pop();
 }
 
-//Instructions screen
-function drawInstructions() {
+//Single player instructions screen
+function drawSingleInstructions() {
     push();
     background(25, 120, 11);
     textAlign(CENTER, CENTER);
@@ -202,6 +221,7 @@ function drawInstructions() {
     text("Catch the flies with your tongue by using 'W'", width / 2, height / 2 - 50);
     text("Press ENTER to continue", width / 2, height / 2 + 50);
     text("Press ESCAPE to go back", width / 2, height / 2 + 100);
+    text("Press SHIFT to see the scoreboard", width / 2, height / 2 + 150);
     pop();
 }
 
@@ -634,8 +654,8 @@ function decrementTimer() {
     if (timer > 0) {
         timer--;
     } else {
-        saveScore();
-        gameState = "scores";
+        saveSingleScore();
+        gameState = "singleScores";
         timer = 90;
         score = 0;
     }
@@ -653,7 +673,7 @@ function drawTimer() {
 /**
  * Saves the score to local storage
  */
-function saveScore() {
+function saveSingleScore() {
     let scores = JSON.parse(localStorage.getItem('scores')) || [];
     scores.push(score);
     localStorage.setItem('scores', JSON.stringify(scores));
@@ -661,7 +681,7 @@ function saveScore() {
 
 // Save the score when the timer reaches 0
 if (timer === 0) {
-    saveScore();
+    saveSingleScore();
 }
 
 /**
@@ -671,23 +691,37 @@ function keyPressed() {
     if (key === 'w' && frog.tongue.state === "idle" && gameState === "game") {
         frog.tongue.state = "outbound";
     } else if (keyCode === ENTER && gameState === "title") {
-        gameState = "instructions";
-    } else if (keyCode === ENTER && gameState === "instructions") {
-        gameState = "flies";
-    } else if (keyCode === ENTER && gameState === "flies") {
+        gameState = "gamemodes";
+
+        //sets the gamemode to single player
+    } else if (keyCode === 83 && gameState === "gamemodes") {
+        gameState = "singleInstructions";
+    } else if (keyCode === ENTER && gameState === "singleInstructions") {
+        gameState = "rules";
+    } else if (keyCode === ENTER && gameState === "rules") {
         gameState = "game";
     } else if (keyCode === ESCAPE && gameState === "game") {
         gameState = "title";
+
+        //sets the gamemode to multiplayer
+    } else if (keyCode === 77 && gameState === "gamemodes") {
+        gameState = "multiInstructions";
+    } else if (keyCode === ENTER && gameState === "multiInstructions") {
+        gameState = "rules2";
+    } else if (keyCode === ESCAPE && gameState === "rules2") {
+        gameState = "game2";
+    } else if (keyCode === ESCAPE && gameState === "game2") {
+        gameState = "title";
     }
 
-    if (keyCode === SHIFT && gameState === "title") {
-        gameState = "scores";
-    } else if (keyCode === ESCAPE && gameState === "scores") {
-        gameState = "title";
-    } else if (keyCode === ESCAPE && gameState === "instructions") {
-        gameState = "title";
-    } else if (keyCode === ESCAPE && gameState === "flies") {
-        gameState = "instructions";
+    if (keyCode === SHIFT && gameState === "singleInstructions") {
+        gameState = "singleScores";
+    } else if (keyCode === ESCAPE && gameState === "singleScores") {
+        gameState = "singleInstructions";
+    } else if (keyCode === ESCAPE && gameState === "singleInstructions") {
+        gameState = "gamemodes";
+    } else if (keyCode === ESCAPE && gameState === "rules") {
+        gameState = "singleInstructions";
     }
 
 }
