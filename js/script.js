@@ -17,6 +17,7 @@
 
 // CountDown Timer
 let singleTimer = 90; // 90 seconds
+let multiTimer = 30; // 30 seconds
 let scoreA = 0;
 let scoreB = 0;
 
@@ -25,12 +26,15 @@ let gameState = "title";
 
 //Scoreboard
 let singleScore = 0;
+//multiplayer victories
+let victA = 0;
+let victB = 0;
 
 // Our Single frog
 const singleFrog = {
     // The frog's body has a position and size
     body: {
-        x: 500,
+        x: 1000,
         y: 1000,
         size: 300
     },
@@ -50,7 +54,7 @@ const singleFrog = {
 const frogA = {
     // The frog's body has a position and size
     body: {
-        x: 250,
+        x: 500,
         y: 1000,
         size: 300
     },
@@ -69,7 +73,7 @@ const frogA = {
 const frogB = {
     // The frog's body has a position and size
     body: {
-        x: 750,
+        x: 1500,
         y: 1000,
         size: 300
     },
@@ -145,6 +149,8 @@ function setup() {
     setInterval(() => {
         if (gameState === "game") {
             decrementTimer();
+        } else if (gameState === "game2") {
+            decrementMultiTimer();
         }
     }, 1000);
 }
@@ -241,7 +247,7 @@ function drawGame2Screen() {
     push();
     fill(0, 0, 0);
     textSize(20);
-    text("Press ESCAPE to go back and pause", 320, 50);
+    text("Press ESCAPE to go back and pause", 800, 50);
     pop();
 
     moveBug();
@@ -255,7 +261,9 @@ function drawGame2Screen() {
     tongueOverlap();
     drawScoreA();
     drawScoreB();
-    drawTimer();
+    drawMultiTimer();
+    drawVictories();
+    drawWhoWon();
 }
 
 //Title screen
@@ -400,48 +408,84 @@ function moveBug() {
     fly.y += random(-5, 5);
     fly.x += fly.speed;
     // Handle the fly going off the canvas
-    if (fly.x > 1500) {
-        resetFly();
+    if (gameState === "game") {
+        if (fly.x > 1500) {
+            resetFly();
+        }
+    } else if (gameState === "game2") {
+        if (fly.x > 2000) {
+            resetFly();
+        }
     }
 
     // Move the firefly
     firefly.y += random(-2, 2);
     firefly.x += firefly.speed;
     // Handle the firefly going off the canvas
-    if (firefly.x > 1500) {
-        resetFirefly();
+    if (gameState === "game") {
+        if (firefly.x > 1500) {
+            resetFirefly();
+        }
+    } else if (gameState === "game2") {
+        if (firefly.x > 2000) {
+            resetFirefly();
+        }
     }
 
     // Move the spicey fly
     spiceyFly.y += random(-10, 10);
     spiceyFly.x += spiceyFly.speed;
     // Handle the spicey fly going off the canvas
-    if (spiceyFly.x > 1500) {
-        resetSpiceyFly();
+    if (gameState === "game") {
+        if (spiceyFly.x > 1500) {
+            resetSpiceyFly();
+        }
+    } else if (gameState === "game2") {
+        if (spiceyFly.x > 2000) {
+            resetSpiceyFly();
+        }
     }
 
     // Move the toxic fly
     toxicFly.y += random(-1, 1);
     toxicFly.x -= toxicFly.speed;
     // Handle the toxic fly going off the canvas
-    if (toxicFly.x < 500) {
-        resetToxicFly();
+    if (gameState === "game") {
+        if (toxicFly.x < 500) {
+            resetToxicFly();
+        }
+    } else if (gameState === "game2") {
+        if (toxicFly.x < 0) {
+            resetToxicFly();
+        }
     }
 
     // Move the mosquito
     mosquito.y += random(-7, 7);
     mosquito.x -= mosquito.speed;
     // Handle the mosquito going off the canvas
-    if (mosquito.x < 500) {
-        resetMosquito();
+    if (gameState === "game") {
+        if (mosquito.x < 500) {
+            resetMosquito();
+        }
+    } else if (gameState === "game2") {
+        if (mosquito.x < 0) {
+            resetMosquito();
+        }
     }
 
     // Move the illFly
     illFly.y += random(-2, 2);
     illFly.x -= illFly.speed;
     // Handle the illFly going off the canvas
-    if (illFly.x < 500) {
-        resetIllFly();
+    if (gameState === "game") {
+        if (illFly.x < 500) {
+            resetIllFly();
+        }
+    } else if (gameState === "game2") {
+        if (illFly.x < 0) {
+            resetIllFly();
+        }
     }
 }
 
@@ -526,7 +570,11 @@ function drawIllFly() {
  */
 function resetFly() {
     // Spawn a regular fly
-    fly.x = 500;
+    if (gameState === "game") {
+        fly.x = 500; // margin for single player
+    } else if (gameState === "game2") {
+        fly.x = 0; // margin for multiplayer
+    }
     fly.y = random(100, 800);
     fly.size = 30;
     fly.speed = 3;
@@ -535,7 +583,11 @@ function resetFly() {
 
 function resetFirefly() {
     // Spawn a firefly
-    firefly.x = 500;
+    if (gameState === "game") {
+        firefly.x = 500; // margin for single player
+    } else if (gameState === "game2") {
+        firefly.x = 0; // margin for multiplayer
+    }
     firefly.y = random(100, 800);
     firefly.size = 20;
     firefly.speed = 4;
@@ -543,7 +595,11 @@ function resetFirefly() {
 
 function resetSpiceyFly() {
     // Spawn a spicey fly
-    spiceyFly.x = 500;
+    if (gameState === "game") {
+        spiceyFly.x = 500; // margin for single player
+    } else if (gameState === "game2") {
+        spiceyFly.x = 0; // margin for multiplayer
+    }
     spiceyFly.y = random(100, 800);
     spiceyFly.size = 15;
     spiceyFly.speed = 10;
@@ -551,7 +607,11 @@ function resetSpiceyFly() {
 
 function resetToxicFly() {
     // Spawn a toxic fly
-    toxicFly.x = 1500;
+    if (gameState === "game") {
+        toxicFly.x = 1500; // margin for single player
+    } else if (gameState === "game2") {
+        toxicFly.x = 2000; // margin for multiplayer
+    }
     toxicFly.y = random(100, 800);
     toxicFly.size = 25;
     toxicFly.speed = 1;
@@ -559,7 +619,11 @@ function resetToxicFly() {
 
 function resetMosquito() {
     // Spawn a mosquito
-    mosquito.x = 1500;
+    if (gameState === "game") {
+        mosquito.x = 1500; // margin for single player
+    } else if (gameState === "game2") {
+        mosquito.x = 2000; // margin for multiplayer
+    }
     mosquito.y = random(100, 800);
     mosquito.size = 10;
     mosquito.speed = 7;
@@ -567,7 +631,12 @@ function resetMosquito() {
 
 function resetIllFly() {
     // Spawn a illFly
-    illFly.x = 1500;
+
+    if (gameState === "game") {
+        illFly.x = 1500; // margin for single player
+    } else if (gameState === "game2") {
+        illFly.x = 2000; // margin for multiplayer
+    }
     illFly.y = random(100, 800);
     illFly.size = 20;
     illFly.speed = 4;
@@ -600,7 +669,7 @@ function moveMultiFrogA() {
 /*
  * Moves the frogB with "LeftArrow" and "RightArrow" on the x position
  */
-function moveMultiFrogA() {
+function moveMultiFrogB() {
     if (keyIsDown(LEFT_ARROW)) { // 'LeftArrow' key
         frogB.body.x = max(frogB.body.x - 10, 0);
     }
@@ -731,13 +800,13 @@ function drawMultiFrogA() {
     push();
     stroke("#ff0000");
     strokeWeight(frogA.tongue.size);
-    line(frogA.tongue.x, frogA.tongue.y, sfrogA.body.x, frogA.body.y);
+    line(frogA.tongue.x, frogA.tongue.y, frogA.body.x, frogA.body.y);
     pop();
     line(frogA.tongue.x, frogA.tongue.y, frogA.body.x, frogA.body.y);
 
     // Draw the frog's body
     push();
-    fill("#00ff00");
+    fill("#8B0000");
     noStroke();
     ellipse(frogA.body.x, frogA.body.y, frogA.body.size);
     pop();
@@ -755,12 +824,12 @@ function drawMultiFrogB() {
     push();
     stroke("#ff0000");
     strokeWeight(frogA.tongue.size);
-    line(frogB.tongue.x, frogB.tongue.y, sfrogA.body.x, frogB.body.y);
+    line(frogB.tongue.x, frogB.tongue.y, frogB.body.x, frogB.body.y);
     pop();
     line(frogB.tongue.x, frogB.tongue.y, frogB.body.x, frogB.body.y);
     // Draw the frog's body
     push();
-    fill("#00ff00");
+    fill("#00008B");
     noStroke();
     ellipse(frogB.body.x, frogB.body.y, frogB.body.size);
     pop();
@@ -991,7 +1060,7 @@ function drawScore() {
 //draws the scoreA on the top left corner
 function drawScoreA() {
     push();
-    fill("#000000");
+    fill("#8B0000");
     textSize(40);
     text("POINTS: " + scoreA, 30, 70);
     pop();
@@ -1000,9 +1069,28 @@ function drawScoreA() {
 //draws the scoreB on the top left corner
 function drawScoreB() {
     push();
+    fill("#00008B");
+    textSize(40);
+    text("POINTS: " + scoreB, 30, 120);
+    pop();
+}
+
+function drawVictories() {
+    push();
     fill("#000000");
     textSize(40);
-    text("POINTS: " + scoreB, 30, 100);
+    text(": " + victA, 1900, 170);
+    text(": " + victB, 1900, 220);
+    pop();
+
+    push();
+    fill("#8B0000");
+    ellipse(1870, 155, 30);
+    pop();
+
+    push();
+    fill("#00008B");
+    ellipse(1870, 205, 30);
     pop();
 }
 
@@ -1018,6 +1106,23 @@ function decrementTimer() {
     }
 }
 
+//Countdown multitimer
+function decrementMultiTimer() {
+    if (multiTimer > 0) {
+        multiTimer--;
+    } else {
+        if (scoreA > scoreB) {
+            victA++;
+        } else if (scoreB > scoreA) {
+            victB++;
+        }
+        multiTimer = 30;
+        scoreA = 0;
+        scoreB = 0;
+        drawWhoWon();
+    }
+}
+
 //draws the timer on the top right corner
 function drawTimer() {
     push();
@@ -1025,6 +1130,37 @@ function drawTimer() {
     textSize(40);
     text("TIME LEFT: " + singleTimer, 1200, 70);
     pop();
+}
+
+//draws the multiplayer timer on the top right corner
+function drawMultiTimer() {
+    push();
+    fill("#000000");
+    textSize(40);
+    text("TIME LEFT: " + multiTimer, 1700, 70);
+    pop();
+}
+
+
+//draws the winner of the game
+function drawWhoWon() {
+    if (victA === 3) {
+        gameState = "redVictory";
+        background(139, 0, 0);
+        textSize(50);
+        fill("#ffcccc");
+        text("Red Frog Wins!", width / 2 - 200, height / 2);
+        textSize(30);
+        text("Press ESCAPE to go back", width / 2 - 200, 100);
+    } else if (victB === 3) {
+        gameState = "blueVictory";
+        background(0, 0, 139);
+        textSize(50);
+        fill("#ADD8E6");
+        text("Blue Frog Wins!", width / 2 - 200, height / 2);
+        textSize(30);
+        text("Press ESCAPE to go back", width / 2 - 200, 100);
+    }
 }
 
 /**
@@ -1080,6 +1216,26 @@ function keyPressed() {
         gameState = "game2";
     } else if (keyCode === ESCAPE && gameState === "game2") {
         gameState = "title";
+    } else if (keyCode === ESCAPE && gameState === "redVictory") {
+        gameState = "gamemodes";
+        frogA.body.x = 500;
+        frogA.tongue.y = 1000;
+        frogA.tongue.state = "idle";
+        frogB.body.x = 1500;
+        frogB.tongue.y = 1000;
+        frogB.tongue.state = "idle";
+        victA = 0;
+        victB = 0;
+    } else if (keyCode === ESCAPE && gameState === "blueVictory") {
+        gameState = "gamemodes";
+        frogA.body.x = 500;
+        frogA.tongue.y = 1000;
+        frogA.tongue.state = "idle";
+        frogB.body.x = 1500;
+        frogB.tongue.y = 1000;
+        frogB.tongue.state = "idle";
+        victA = 0;
+        victB = 0;
     }
 
 
