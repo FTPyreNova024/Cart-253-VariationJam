@@ -102,7 +102,7 @@ const spiceyFly = {
 };
 
 const mosquito = {
-    x: 1000,
+    x: 2000,
     y: 200, // Will be random
     size: 10,
     speed: 7,
@@ -118,14 +118,14 @@ const firefly = {
 };
 
 const toxicFly = {
-    x: 1000,
+    x: 2000,
     y: 200, // Will be random
     size: 25,
     speed: 1
 };
 
 const illFly = {
-    x: 1000,
+    x: 2000,
     y: 200, // Will be random
     size: 20,
     speed: 4
@@ -206,11 +206,12 @@ function drawGamemodes() {
 
 //Single player game screen
 function drawGameScreen() {
+
     background("#87ceeb");
     push();
     fill(0, 0, 0);
     textSize(20);
-    text("Press ESCAPE to go back and pause", 320, 50);
+    text("Press ESCAPE to go back and pause", 820, 50);
     pop();
 
     moveBug();
@@ -221,6 +222,17 @@ function drawGameScreen() {
     tongueOverlap();
     drawScore();
     drawTimer();
+
+    drawSingleGameBorder();
+}
+
+//Hides the excess of the game screen
+function drawSingleGameBorder() {
+    push();
+    fill(0, 100, 0);
+    rect(0, 0, 500, 1000);
+    rect(1500, 0, 500, 1000);
+    pop();
 }
 
 //Multiplayer game screen
@@ -388,7 +400,7 @@ function moveBug() {
     fly.y += random(-5, 5);
     fly.x += fly.speed;
     // Handle the fly going off the canvas
-    if (fly.x > width) {
+    if (fly.x > 1500) {
         resetFly();
     }
 
@@ -396,7 +408,7 @@ function moveBug() {
     firefly.y += random(-2, 2);
     firefly.x += firefly.speed;
     // Handle the firefly going off the canvas
-    if (firefly.x > width) {
+    if (firefly.x > 1500) {
         resetFirefly();
     }
 
@@ -404,7 +416,7 @@ function moveBug() {
     spiceyFly.y += random(-10, 10);
     spiceyFly.x += spiceyFly.speed;
     // Handle the spicey fly going off the canvas
-    if (spiceyFly.x > width) {
+    if (spiceyFly.x > 1500) {
         resetSpiceyFly();
     }
 
@@ -412,7 +424,7 @@ function moveBug() {
     toxicFly.y += random(-1, 1);
     toxicFly.x -= toxicFly.speed;
     // Handle the toxic fly going off the canvas
-    if (toxicFly.x < 0) {
+    if (toxicFly.x < 500) {
         resetToxicFly();
     }
 
@@ -420,7 +432,7 @@ function moveBug() {
     mosquito.y += random(-7, 7);
     mosquito.x -= mosquito.speed;
     // Handle the mosquito going off the canvas
-    if (mosquito.x < 0) {
+    if (mosquito.x < 500) {
         resetMosquito();
     }
 
@@ -428,7 +440,7 @@ function moveBug() {
     illFly.y += random(-2, 2);
     illFly.x -= illFly.speed;
     // Handle the illFly going off the canvas
-    if (illFly.x < 0) {
+    if (illFly.x < 500) {
         resetIllFly();
     }
 }
@@ -514,7 +526,7 @@ function drawIllFly() {
  */
 function resetFly() {
     // Spawn a regular fly
-    fly.x = 0;
+    fly.x = 500;
     fly.y = random(100, 800);
     fly.size = 30;
     fly.speed = 3;
@@ -523,7 +535,7 @@ function resetFly() {
 
 function resetFirefly() {
     // Spawn a firefly
-    firefly.x = 0;
+    firefly.x = 500;
     firefly.y = random(100, 800);
     firefly.size = 20;
     firefly.speed = 4;
@@ -531,7 +543,7 @@ function resetFirefly() {
 
 function resetSpiceyFly() {
     // Spawn a spicey fly
-    spiceyFly.x = 0;
+    spiceyFly.x = 500;
     spiceyFly.y = random(100, 800);
     spiceyFly.size = 15;
     spiceyFly.speed = 10;
@@ -539,7 +551,7 @@ function resetSpiceyFly() {
 
 function resetToxicFly() {
     // Spawn a toxic fly
-    toxicFly.x = 1000;
+    toxicFly.x = 1500;
     toxicFly.y = random(100, 800);
     toxicFly.size = 25;
     toxicFly.speed = 1;
@@ -547,7 +559,7 @@ function resetToxicFly() {
 
 function resetMosquito() {
     // Spawn a mosquito
-    mosquito.x = 1000;
+    mosquito.x = 1500;
     mosquito.y = random(100, 800);
     mosquito.size = 10;
     mosquito.speed = 7;
@@ -555,7 +567,7 @@ function resetMosquito() {
 
 function resetIllFly() {
     // Spawn a illFly
-    illFly.x = 1000;
+    illFly.x = 1500;
     illFly.y = random(100, 800);
     illFly.size = 20;
     illFly.speed = 4;
@@ -566,13 +578,13 @@ function resetIllFly() {
  */
 function moveSingleFrog() {
     if (keyIsDown(65)) { // 'A' key
-        singleFrog.body.x = max(singleFrog.body.x - 10, 0);
+        singleFrog.body.x = Math.max(singleFrog.body.x - 10, 500);
     }
     if (keyIsDown(68)) { // 'D' key
-        singleFrog.body.x = min(singleFrog.body.x + 10, width);
+        singleFrog.body.x = Math.min(singleFrog.body.x + 10, 1500);
     }
 }
-
+a
 /**
  * Moves the frogA with "A" and "D" on the x position
  */
@@ -972,7 +984,7 @@ function drawScore() {
     push();
     fill("#000000");
     textSize(40);
-    text("POINTS: " + singleScore, 30, 70);
+    text("POINTS: " + singleScore, 530, 70);
     pop();
 }
 
@@ -1011,7 +1023,7 @@ function drawTimer() {
     push();
     fill("#000000");
     textSize(40);
-    text("TIME LEFT: " + singleTimer, 700, 70);
+    text("TIME LEFT: " + singleTimer, 1200, 70);
     pop();
 }
 
