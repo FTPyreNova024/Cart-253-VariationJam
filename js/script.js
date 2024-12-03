@@ -18,6 +18,7 @@
 // CountDown Timer
 let singleTimer = 90; // 90 seconds
 let multiTimer = 30; // 30 seconds
+let pFlyTimer = 60; // 60 seconds
 let scoreA = 0;
 let scoreB = 0;
 
@@ -151,6 +152,8 @@ function setup() {
             decrementTimer();
         } else if (gameState === "game2") {
             decrementMultiTimer();
+        } else if (gameState === "game3") {
+            decrementPFlyTimer();
         }
     }, 1000);
 }
@@ -175,6 +178,10 @@ function draw() {
         //Basic instructions of the game
         drawMultiInstructions();
 
+    } else if (gameState === "pFlyInstructions") {
+        //Display the instrusctions for the player fly gamemode
+        drawPFlyInstructions();
+
     } else if (gameState === "rules") {
         //Display types of flies
         drawTypesOfFlies();
@@ -192,6 +199,15 @@ function draw() {
     } else if (gameState === "game2") {
         //Game screen
         drawGame2Screen();
+    } else if (gameState === "game3") {
+        //Game screen
+        drawGame3Screen();
+    } else if (gameState === "game3Over") {
+        //Game over screen
+        drawGameOver();
+    } else if (gameState === "congatulations") {
+        //You win the game screen
+        drawCongratulations();
     }
 }
 
@@ -206,6 +222,7 @@ function drawGamemodes() {
     textSize(30);
     text("Single player: Press 'S'", width / 2, height / 2 - 100);
     text("Multiplayer: Press 'M'", width / 2, height / 2 - 50);
+    text("Fly: Press 'F'", width / 2, height / 2);
     text("Press ESCAPE to go back", width / 2, height / 2 + 50);
     pop();
 }
@@ -264,6 +281,29 @@ function drawGame2Screen() {
     drawMultiTimer();
     drawVictories();
     drawWhoWon();
+}
+
+//Player fly game screen
+function drawGame3Screen() {
+    background("#87ceeb");
+    drawPFlyFrog();
+    // checkTonguePFlyOverlap();
+    drawPFlyTimer();
+    drawPFly();
+
+    push();
+    fill(0, 0, 0);
+    textSize(20);
+    text("Press ESCAPE to go back and pause", 800, 50);
+    pop();
+}
+
+//Draws the player fly
+function drawPFly() {
+    push();
+    fill(0); // black color
+    ellipse(mouseX, mouseY, 30, 30);
+    pop();
 }
 
 //Title screen
@@ -332,6 +372,21 @@ function drawMultiInstructions() {
     text("Move the Blue frog with 'LArrow' and 'RArrow'", width / 2, height / 2 - 100);
     text("Red frog. catch the flies with your tongue by using 'W'", width / 2, height / 2 - 50);
     text("Blue frog. catch the flies with your tongue by using 'upArrow'", width / 2, height / 2);
+    text("Press ENTER to continue", width / 2, height / 2 + 50);
+    text("Press ESCAPE to go back", width / 2, height / 2 + 100);
+    pop();
+}
+
+function drawPFlyInstructions() {
+    push();
+    background(25, 120, 11);
+    textAlign(CENTER, CENTER);
+    textSize(50);
+    fill("#000000");
+    text("Instructions", width / 2, height / 2 - 200);
+    textSize(30);
+    text("Move the fly with your mouse", width / 2, height / 2 - 100);
+    text("Avoid the frog tongues and survive as long as you can", width / 2, height / 2 - 50);
     text("Press ENTER to continue", width / 2, height / 2 + 50);
     text("Press ESCAPE to go back", width / 2, height / 2 + 100);
     pop();
@@ -835,6 +890,38 @@ function drawMultiFrogB() {
     pop();
 }
 
+function drawPFlyFrog() {
+
+    function drawBorderFrog(x, y) {
+        push();
+        fill("#14b32e");
+        noStroke();
+        ellipse(x, y, 300);
+        pop();
+    }
+
+    function drawBorderFrogs() {
+        // Top border
+        for (let x = 0; x < width; x += 300) {
+            drawBorderFrog(x, 0);
+        }
+        // Bottom border
+        for (let x = 0; x < width; x += 300) {
+            drawBorderFrog(x, height);
+        }
+        // Left border
+        for (let y = 0; y < height; y += 300) {
+            drawBorderFrog(0, y);
+        }
+        // Right border
+        for (let y = 0; y < height; y += 300) {
+            drawBorderFrog(width, y);
+        }
+    }
+
+    drawBorderFrogs();
+}
+
 /**
  * Handles the tongue overlapping the bugs
  */
@@ -1048,6 +1135,57 @@ function checkTongueIllFlyOverlap() {
     }
 }
 
+function shootRandomTongue(frog) {
+    if (frog.tongue.state === "idle" && random() < 0.01) { // 1% chance each frame
+        frog.tongue.state = "outbound";
+    }
+}
+
+function movePFlyFrogTongues() {
+    moveSingleTongue();
+    moveMultiTongueA();
+    moveMultiTongueB();
+}
+
+function drawPFlyFrog() {
+    function drawBorderFrog(x, y) {
+        push();
+        fill("#14b32e");
+        noStroke();
+        ellipse(x, y, 300);
+        pop();
+    }
+
+    function drawBorderFrogs() {
+        // Top border
+        for (let x = 0; x < width; x += 300) {
+            drawBorderFrog(x, 0);
+        }
+        // Bottom border
+        for (let x = 0; x < width; x += 300) {
+            drawBorderFrog(x, height);
+        }
+        // Left border
+        for (let y = 0; y < height; y += 300) {
+            drawBorderFrog(0, y);
+        }
+        // Right border
+        for (let y = 0; y < height; y += 300) {
+            drawBorderFrog(width, y);
+        }
+    }
+
+    drawBorderFrogs();
+
+    // Make frogs shoot tongues at random times
+    shootRandomTongue(singleFrog);
+    shootRandomTongue(frogA);
+    shootRandomTongue(frogB);
+
+    // Move tongues
+    movePFlyFrogTongues();
+}
+
 // draws the score on the top left corner
 function drawScore() {
     push();
@@ -1123,6 +1261,16 @@ function decrementMultiTimer() {
     }
 }
 
+//Countdown for the player fly
+function decrementPFlyTimer() {
+    if (pFlyTimer > 0) {
+        pFlyTimer--;
+    } else {
+        gameState = "congratulations";
+        pFlyTimer = 60;
+    }
+}
+
 //draws the timer on the top right corner
 function drawTimer() {
     push();
@@ -1138,6 +1286,15 @@ function drawMultiTimer() {
     fill("#000000");
     textSize(40);
     text("TIME LEFT: " + multiTimer, 1700, 70);
+    pop();
+}
+
+//draws the Player fly timer on the top right corner
+function drawPFlyTimer() {
+    push();
+    fill("#000000");
+    textSize(40);
+    text("TIME LEFT: " + pFlyTimer, 1200, 70);
     pop();
 }
 
@@ -1185,7 +1342,7 @@ if (singleTimer === 0 && !scoreSaved) {
  * handles the diferent key presses and screens, plus the tongue actions
  */
 function keyPressed() {
-    if (key === 'w' && singleFrog.tongue.state === "idle" && gameState === "game") {
+    if (keyCode === 87 && singleFrog.tongue.state === "idle" && gameState === "game") {
         singleFrog.tongue.state = "outbound";
     } else if (keyCode === ENTER && gameState === "title") {
         gameState = "gamemodes";
@@ -1193,7 +1350,7 @@ function keyPressed() {
         gameState = "title";
 
         //sets the gamemode to single player
-    } else if (key === 'w' && frogA.tongue.state === "idle" && gameState === "game2") {
+    } else if (keyCode === 87 && frogA.tongue.state === "idle" && gameState === "game2") {
         frogA.tongue.state = "outbound";
     } else if (keyCode === 83 && gameState === "gamemodes") {
         gameState = "singleInstructions";
@@ -1238,6 +1395,21 @@ function keyPressed() {
         victB = 0;
     }
 
+    if (keyCode === 70 && gameState === "gamemodes") {
+        gameState = "pFlyInstructions";
+    } else if (keyCode === ENTER && gameState === "pFlyInstructions") {
+        gameState = "game3";
+    } else if (keyCode === ESCAPE && gameState === "game3") {
+        gameState = "gamemodes";
+    } else if (keyCode === ESCAPE && gameState === "pFlyInstructions") {
+        gameState = "gamemodes";
+    } else if (keyCode === ESCAPE && gameState === "congratulations") {
+        gameState = "gamemodes";
+    } else if (lives === 0 && gameState === "game3") {
+        gameState = "game3Over";
+    } else if (pFlyTimer === 0 && gameState === "game3") {
+        gameState = "congratulations";
+    }
 
 
     //Navigate through the scores and instructions
