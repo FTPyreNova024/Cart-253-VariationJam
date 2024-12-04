@@ -21,6 +21,11 @@ let multiTimer = 30; // 30 seconds
 let pFlyTimer = 60; // 60 seconds
 let scoreA = 0;
 let scoreB = 0;
+let lives = 3;
+
+// Frogs array and number of frogs for player fly game mode
+const pfrogs = [];
+const numpFrogs = 20;
 
 //Title screen
 let gameState = "title";
@@ -89,6 +94,12 @@ const frogB = {
     }
 };
 
+const pFly = {
+    x: 0,
+    y: 0,
+    fill: "black",
+}
+
 // Our bugs
 // Have a position, size, and speed of horizontal movement
 
@@ -156,6 +167,28 @@ function setup() {
             decrementPFlyTimer();
         }
     }, 1000);
+
+    for (let i = 0; i < numpFrogs; i++) {
+        let frog = {
+            x: 0,
+            y: 0,
+            fill: "green",
+            tongue: {
+                x: 0,
+                y: 0,
+                speed: 5,
+                state: "idle",
+                targetX: 0,
+                targetY: 0,
+            },
+            shootProbability: 0.005,
+            probabilityIncrement: 0.01,
+        };
+        let position = getRandomBorderPosition();
+        frog.x = position.x;
+        frog.y = position.y;
+        pfrogs.push(frog);
+    }
 }
 
 /**
@@ -205,7 +238,7 @@ function draw() {
     } else if (gameState === "game3Over") {
         //Game over screen
         drawGameOver();
-    } else if (gameState === "congatulations") {
+    } else if (gameState === "congratulations") {
         //You win the game screen
         drawCongratulations();
     }
@@ -286,11 +319,19 @@ function drawGame2Screen() {
 //Player fly game screen
 function drawGame3Screen() {
     background("#87ceeb");
-    drawPFlyFrog();
-    // checkTonguePFlyOverlap();
-    drawPFlyTimer();
+    pFly.x = mouseX;
+    pFly.y = mouseY;
     drawPFly();
-
+    for (let frog of pfrogs) {
+        drawTongue(frog);
+        drawFrog(frog);
+        shootTongue(frog);
+    }
+    checkPFlyTongueOverlap();
+    checkLives();
+    drawPFlyTimer();
+    drawlives();
+    drawYouWon();
     push();
     fill(0, 0, 0);
     textSize(20);
@@ -298,12 +339,148 @@ function drawGame3Screen() {
     pop();
 }
 
+function drawYouWon() {
+    if (pFlyTimer === 0) {
+        gameState = "congratulations";
+        for (let frog of pfrogs) {
+            frog.tongue.state = "idle";
+            frog.shootProbability = 0; // Prevent tongues from being shot
+        }
+        setTimeout(() => {
+            lives = 4;
+            for (let frog of pfrogs) {
+                frog.shootProbability = 0.005; // Reset shoot probability for new game
+            }
+        }, 2000); // Reset lives after 2 seconds
+    }
+}
+
+//Checks how many lives the player has left and resets the game if the player has no lives left
+function checkLives() {
+    if (lives === 0) {
+        gameState = "game3Over";
+        for (let frog of pfrogs) {
+            frog.tongue.state = "idle";
+            frog.shootProbability = 0; // Prevent tongues from being shot
+        }
+        setTimeout(() => {
+            lives = 4;
+            for (let frog of pfrogs) {
+                frog.shootProbability = 0.005; // Reset shoot probability for new game
+            }
+        }, 2000); // Reset lives after 2 seconds
+    }
+}
+
+function drawGameOver() {
+    push();
+    background(25, 120, 11);
+    textAlign(CENTER, CENTER);
+    textSize(50);
+    fill("#000000");
+    text("Game Over", width / 2, height / 2 - 200);
+    textSize(30);
+    text("Press ESCAPE to go back", width / 2, height / 2 + 50);
+    pop();
+}
+
+function drawCongratulations() {
+    push();
+    background(25, 120, 11);
+    textAlign(CENTER, CENTER);
+    textSize(50);
+    fill("#000000");
+    text("Congratulations", width / 2, height / 2 - 200);
+    textSize(30);
+    text("Press ESCAPE to go back", width / 2, height / 2 + 50);
+    pop();
+}
+
 //Draws the player fly
 function drawPFly() {
+    pFly.x = constrain(pFly.x, 0, width);
+    pFly.y = constrain(pFly.y, 0, height);
     push();
-    fill(0); // black color
-    ellipse(mouseX, mouseY, 30, 30);
+    fill(pFly.fill);
+    ellipse(pFly.x, pFly.y, 80, 80);
     pop();
+}
+
+//Draws the frogs in the third game mode
+function drawFrog(frog) {
+    push();
+    fill(frog.fill);
+    ellipse(frog.x, frog.y, 200, 200);
+    pop();
+}
+
+//Draws the tongue of the frogs in the third game mode
+function drawTongue(frog) {
+    push();
+    strokeWeight(50);
+    stroke(255, 0, 0);
+    if (frog.tongue.state === "idle") {
+        fill(255, 0, 0);
+        ellipse(frog.x, frog.y, 50, 50);
+    } else {
+        line(frog.tongue.x, frog.tongue.y, frog.x, frog.y);
+    }
+    pop();
+}
+
+function drawlives() {
+    push();
+    fill(0, 0, 0);
+    textSize(50);
+    text("Lives: " + lives, 70, 100);
+    pop();
+}
+
+//Makes the thongues shoot out in the third game mode
+function shootTongue(frog) {
+    if (random(1) < frog.shootProbability && frog.tongue.state === "idle") {
+        frog.tongue.state = "shooting";
+        frog.tongue.x = frog.x;
+        frog.tongue.y = frog.y;
+        frog.tongue.targetX = constrain(pFly.x, 0, width);
+        frog.tongue.targetY = constrain(pFly.y, 0, height);
+        frog.shootProbability = 0.005; // Reset probability after shooting
+    }
+
+    if (frog.tongue.state === "shooting") {
+        let dx = frog.tongue.targetX - frog.tongue.x;
+        let dy = frog.tongue.targetY - frog.tongue.y;
+        let distance = sqrt(dx * dx + dy * dy);
+
+        if (distance < frog.tongue.speed) {
+            frog.tongue.x = frog.tongue.targetX;
+            frog.tongue.y = frog.tongue.targetY;
+            frog.tongue.state = "retracting";
+        } else {
+            frog.tongue.x += dx / distance * frog.tongue.speed;
+            frog.tongue.y += dy / distance * frog.tongue.speed;
+        }
+    }
+
+    if (frog.tongue.state === "retracting") {
+        let dx = frog.x - frog.tongue.x;
+        let dy = frog.y - frog.tongue.y;
+        let distance = sqrt(dx * dx + dy * dy);
+
+        if (distance < frog.tongue.speed) {
+            frog.tongue.x = frog.x;
+            frog.tongue.y = frog.y;
+            frog.tongue.state = "idle";
+        } else {
+            frog.tongue.x += dx / distance * frog.tongue.speed;
+            frog.tongue.y += dy / distance * frog.tongue.speed;
+        }
+    }
+
+    // Increase the probability of shooting over time
+    if (frog.shootProbability < 0.1) {
+        frog.shootProbability += frog.probabilityIncrement;
+    }
 }
 
 //Title screen
@@ -890,36 +1067,29 @@ function drawMultiFrogB() {
     pop();
 }
 
-function drawPFlyFrog() {
-
-    function drawBorderFrog(x, y) {
-        push();
-        fill("#14b32e");
-        noStroke();
-        ellipse(x, y, 300);
-        pop();
+//creates the frogs in random positions for the player fly game
+function getRandomBorderPosition() {
+    let position = {};
+    let side = floor(random(4));
+    switch (side) {
+        case 0: // Top
+            position.x = random(width);
+            position.y = 0;
+            break;
+        case 1: // Right
+            position.x = width;
+            position.y = random(height);
+            break;
+        case 2: // Bottom
+            position.x = random(width);
+            position.y = height;
+            break;
+        case 3: // Left
+            position.x = 0;
+            position.y = random(height);
+            break;
     }
-
-    function drawBorderFrogs() {
-        // Top border
-        for (let x = 0; x < width; x += 300) {
-            drawBorderFrog(x, 0);
-        }
-        // Bottom border
-        for (let x = 0; x < width; x += 300) {
-            drawBorderFrog(x, height);
-        }
-        // Left border
-        for (let y = 0; y < height; y += 300) {
-            drawBorderFrog(0, y);
-        }
-        // Right border
-        for (let y = 0; y < height; y += 300) {
-            drawBorderFrog(width, y);
-        }
-    }
-
-    drawBorderFrogs();
+    return position;
 }
 
 /**
@@ -1135,55 +1305,16 @@ function checkTongueIllFlyOverlap() {
     }
 }
 
-function shootRandomTongue(frog) {
-    if (frog.tongue.state === "idle" && random() < 0.01) { // 1% chance each frame
-        frog.tongue.state = "outbound";
-    }
-}
-
-function movePFlyFrogTongues() {
-    moveSingleTongue();
-    moveMultiTongueA();
-    moveMultiTongueB();
-}
-
-function drawPFlyFrog() {
-    function drawBorderFrog(x, y) {
-        push();
-        fill("#14b32e");
-        noStroke();
-        ellipse(x, y, 300);
-        pop();
-    }
-
-    function drawBorderFrogs() {
-        // Top border
-        for (let x = 0; x < width; x += 300) {
-            drawBorderFrog(x, 0);
-        }
-        // Bottom border
-        for (let x = 0; x < width; x += 300) {
-            drawBorderFrog(x, height);
-        }
-        // Left border
-        for (let y = 0; y < height; y += 300) {
-            drawBorderFrog(0, y);
-        }
-        // Right border
-        for (let y = 0; y < height; y += 300) {
-            drawBorderFrog(width, y);
+//checks if the player fly is caught by the frog tongues
+function checkPFlyTongueOverlap() {
+    for (let frog of pfrogs) {
+        let d = dist(frog.tongue.x, frog.tongue.y, pFly.x, pFly.y);
+        let eaten = (d < 25); // pFly size is 50, so radius is 25
+        if (eaten && frog.tongue.state !== "retracting") {
+            lives--;
+            frog.tongue.state = "retracting"; // Set tongue state to retracting to ensure it only removes one life
         }
     }
-
-    drawBorderFrogs();
-
-    // Make frogs shoot tongues at random times
-    shootRandomTongue(singleFrog);
-    shootRandomTongue(frogA);
-    shootRandomTongue(frogB);
-
-    // Move tongues
-    movePFlyFrogTongues();
 }
 
 // draws the score on the top left corner
@@ -1294,7 +1425,7 @@ function drawPFlyTimer() {
     push();
     fill("#000000");
     textSize(40);
-    text("TIME LEFT: " + pFlyTimer, 1200, 70);
+    text("TIME LEFT: " + pFlyTimer, 1200, 100);
     pop();
 }
 
@@ -1401,15 +1532,12 @@ function keyPressed() {
         gameState = "game3";
     } else if (keyCode === ESCAPE && gameState === "game3") {
         gameState = "gamemodes";
-    } else if (keyCode === ESCAPE && gameState === "pFlyInstructions") {
+    } else if (keyCode === ESCAPE && gameState === "game3Over") {
         gameState = "gamemodes";
     } else if (keyCode === ESCAPE && gameState === "congratulations") {
         gameState = "gamemodes";
-    } else if (lives === 0 && gameState === "game3") {
-        gameState = "game3Over";
-    } else if (pFlyTimer === 0 && gameState === "game3") {
-        gameState = "congratulations";
     }
+
 
 
     //Navigate through the scores and instructions
