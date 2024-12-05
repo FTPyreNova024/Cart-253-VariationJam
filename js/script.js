@@ -19,6 +19,7 @@
 let singleTimer = 90; // 90 seconds
 let multiTimer = 30; // 30 seconds
 let pFlyTimer = 60; // 60 seconds
+let kFlyTimer = 10; // 10 seconds
 let scoreA = 0;
 let scoreB = 0;
 let lives = 3;
@@ -94,7 +95,15 @@ const frogB = {
     }
 };
 
+//creates the player fly for the third gamemode
 const pFly = {
+    x: 0,
+    y: 0,
+    fill: "black",
+}
+
+//creates the killed fly for the fourth gamemode
+const kFly = {
     x: 0,
     y: 0,
     fill: "black",
@@ -167,6 +176,12 @@ function setup() {
             decrementPFlyTimer();
         }
     }, 1000);
+
+    setInterval(() => {
+        if (gameState === "game4") {
+            decrementKFlyTimer();
+        }
+    }, 10);
 
     for (let i = 0; i < numpFrogs; i++) {
         let frog = {
@@ -241,6 +256,15 @@ function draw() {
     } else if (gameState === "congratulations") {
         //You win the game screen
         drawCongratulations();
+    } else if (gameState === "killInstructions") {
+        //Display the instrusctions for the player fly gamemode
+        drawKillFlyInstructions();
+    } else if (gameState === "game4") {
+        //Game screen
+        drawKillFlyScreen();
+    } else if (gameState === "timeOver") {
+        //Game over screen
+        drawKillFlyOver(timeTaken);
     }
 }
 
@@ -256,7 +280,8 @@ function drawGamemodes() {
     text("Single player: Press 'S'", width / 2, height / 2 - 100);
     text("Multiplayer: Press 'M'", width / 2, height / 2 - 50);
     text("Fly: Press 'F'", width / 2, height / 2);
-    text("Press ESCAPE to go back", width / 2, height / 2 + 50);
+    text("Kill the fly: press K", width / 2, height / 2 + 50);
+    text("Press ESCAPE to go back", width / 2, height / 2 + 100);
     pop();
 }
 
@@ -339,6 +364,20 @@ function drawGame3Screen() {
     pop();
 }
 
+//Kill the fly game screen
+function drawKillFlyScreen() {
+    background("#87ceeb");
+    push
+    fill(0, 0, 0);
+    textSize(20);
+    text("Press ESCAPE to go back and pause", 800, 50);
+    pop();
+
+    drawKFlyTimer();
+    drawKillFly();
+    checkKillFlyOverlap();
+}
+
 function drawYouWon() {
     if (pFlyTimer === 0) {
         gameState = "congratulations";
@@ -396,6 +435,24 @@ function drawCongratulations() {
     pop();
 }
 
+//Draws the last screen of the fourth game mode
+function drawKillFlyOver(timeTaken) {
+    push();
+    background(25, 120, 11);
+    textAlign(CENTER, CENTER);
+    textSize(50);
+    fill("#000000");
+    text("Time Over, you killed the fly in " + timeTaken.toFixed(2) + " seconds", width / 2, height / 2 - 200);
+    textSize(30);
+    text("Press ESCAPE to go back", width / 2, height / 2 + 50);
+    pop();
+
+    // Check if the ESCAPE key is pressed
+    if (keyIsPressed && keyCode === ESCAPE) {
+        gameState = "gamemodes";
+    }
+}
+
 //Draws the player fly
 function drawPFly() {
     pFly.x = constrain(pFly.x, 0, width);
@@ -428,59 +485,13 @@ function drawTongue(frog) {
     pop();
 }
 
+//draws the lives left for the player on the third game mode
 function drawlives() {
     push();
     fill(0, 0, 0);
     textSize(50);
     text("Lives: " + lives, 70, 100);
     pop();
-}
-
-//Makes the thongues shoot out in the third game mode
-function shootTongue(frog) {
-    if (random(1) < frog.shootProbability && frog.tongue.state === "idle") {
-        frog.tongue.state = "shooting";
-        frog.tongue.x = frog.x;
-        frog.tongue.y = frog.y;
-        frog.tongue.targetX = constrain(pFly.x, 0, width);
-        frog.tongue.targetY = constrain(pFly.y, 0, height);
-        frog.shootProbability = 0.005; // Reset probability after shooting
-    }
-
-    if (frog.tongue.state === "shooting") {
-        let dx = frog.tongue.targetX - frog.tongue.x;
-        let dy = frog.tongue.targetY - frog.tongue.y;
-        let distance = sqrt(dx * dx + dy * dy);
-
-        if (distance < frog.tongue.speed) {
-            frog.tongue.x = frog.tongue.targetX;
-            frog.tongue.y = frog.tongue.targetY;
-            frog.tongue.state = "retracting";
-        } else {
-            frog.tongue.x += dx / distance * frog.tongue.speed;
-            frog.tongue.y += dy / distance * frog.tongue.speed;
-        }
-    }
-
-    if (frog.tongue.state === "retracting") {
-        let dx = frog.x - frog.tongue.x;
-        let dy = frog.y - frog.tongue.y;
-        let distance = sqrt(dx * dx + dy * dy);
-
-        if (distance < frog.tongue.speed) {
-            frog.tongue.x = frog.x;
-            frog.tongue.y = frog.y;
-            frog.tongue.state = "idle";
-        } else {
-            frog.tongue.x += dx / distance * frog.tongue.speed;
-            frog.tongue.y += dy / distance * frog.tongue.speed;
-        }
-    }
-
-    // Increase the probability of shooting over time
-    if (frog.shootProbability < 0.1) {
-        frog.shootProbability += frog.probabilityIncrement;
-    }
 }
 
 //Title screen
@@ -569,6 +580,20 @@ function drawPFlyInstructions() {
     pop();
 }
 
+function drawKillFlyInstructions() {
+    push();
+    background(25, 120, 11);
+    textAlign(CENTER, CENTER);
+    textSize(50);
+    fill("#000000");
+    text("Instructions", width / 2, height / 2 - 200);
+    textSize(30);
+    text("Click on the fly as fast as you can", width / 2, height / 2 - 100);
+    text("Press ENTER to continue", width / 2, height / 2 + 50);
+    text("Press ESCAPE to go back", width / 2, height / 2 + 100);
+    pop();
+}
+
 //Types of bugs screen
 function drawTypesOfFlies() {
     push();
@@ -631,6 +656,20 @@ function drawTypesOfFlies() {
     text("Press ESCAPE to go back", width / 2, height / 2 + 250);
     pop();
 }
+
+//Draws the fly at a random location
+function drawKillFly() {
+    if (frameCount % 60 === 0) { // Change position every second (assuming 60 FPS)
+        kFly.x = random(0, width);
+        kFly.y = random(0, height);
+    }
+    push();
+    noStroke();
+    fill(kFly.fill);
+    ellipse(kFly.x, kFly.y, 50);
+    pop();
+}
+
 /**
  * Moves the bugs according to its speed
  * Resets the bugs if it gets all the way to the right or left
@@ -991,6 +1030,54 @@ function moveMultiTongueB() {
         }
     }
 }
+
+//Makes the thongues shoot out in the third game mode
+function shootTongue(frog) {
+    if (random(1) < frog.shootProbability && frog.tongue.state === "idle") {
+        frog.tongue.state = "shooting";
+        frog.tongue.x = frog.x;
+        frog.tongue.y = frog.y;
+        frog.tongue.targetX = constrain(pFly.x, 0, width);
+        frog.tongue.targetY = constrain(pFly.y, 0, height);
+        frog.shootProbability = 0.005; // Reset probability after shooting
+    }
+
+    if (frog.tongue.state === "shooting") {
+        let dx = frog.tongue.targetX - frog.tongue.x;
+        let dy = frog.tongue.targetY - frog.tongue.y;
+        let distance = sqrt(dx * dx + dy * dy);
+
+        if (distance < frog.tongue.speed) {
+            frog.tongue.x = frog.tongue.targetX;
+            frog.tongue.y = frog.tongue.targetY;
+            frog.tongue.state = "retracting";
+        } else {
+            frog.tongue.x += dx / distance * frog.tongue.speed;
+            frog.tongue.y += dy / distance * frog.tongue.speed;
+        }
+    }
+
+    if (frog.tongue.state === "retracting") {
+        let dx = frog.x - frog.tongue.x;
+        let dy = frog.y - frog.tongue.y;
+        let distance = sqrt(dx * dx + dy * dy);
+
+        if (distance < frog.tongue.speed) {
+            frog.tongue.x = frog.x;
+            frog.tongue.y = frog.y;
+            frog.tongue.state = "idle";
+        } else {
+            frog.tongue.x += dx / distance * frog.tongue.speed;
+            frog.tongue.y += dy / distance * frog.tongue.speed;
+        }
+    }
+
+    // Increase the probability of shooting over time
+    if (frog.shootProbability < 0.1) {
+        frog.shootProbability += frog.probabilityIncrement;
+    }
+}
+
 /**
  * Displays the tongue (tip and line connection) and the frog (body)
  */
@@ -1317,6 +1404,27 @@ function checkPFlyTongueOverlap() {
     }
 }
 
+//Checks if the player fly is caught by the kill fly
+function checkKillFlyOverlap() {
+    if (mouseIsPressed) {
+        let d = dist(mouseX, mouseY, kFly.x, kFly.y);
+        let clicked = (d < 25); // kFly size is 50, so radius is 25
+        if (clicked) {
+            let timeTaken = 10 - kFlyTimer;
+            drawKillFlyOver(timeTaken);
+            kFlyTimer = 10;
+            gameState = "timeOver";
+        }
+    }
+}
+
+// Handles mouse clicks for the kill fly game mode
+function mousePressed() {
+    if (gameState === "game4") {
+        checkKillFlyOverlap();
+    }
+}
+
 // draws the score on the top left corner
 function drawScore() {
     push();
@@ -1402,6 +1510,16 @@ function decrementPFlyTimer() {
     }
 }
 
+function decrementKFlyTimer() {
+    if (kFlyTimer > 0) {
+        kFlyTimer -= 0.01;
+        kFlyTimer = parseFloat(kFlyTimer.toFixed(2)); // Keep only two decimal places
+    } else {
+        gameState = "timeOver";
+        kFlyTimer = 10;
+    }
+}
+
 //draws the timer on the top right corner
 function drawTimer() {
     push();
@@ -1426,6 +1544,15 @@ function drawPFlyTimer() {
     fill("#000000");
     textSize(40);
     text("TIME LEFT: " + pFlyTimer, 1200, 100);
+    pop();
+}
+
+//draws the Kill the fly timer on the top right corner
+function drawKFlyTimer() {
+    push();
+    fill("#000000");
+    textSize(40);
+    text("TIME LEFT: " + kFlyTimer, 1200, 100);
     pop();
 }
 
@@ -1492,8 +1619,8 @@ function keyPressed() {
     } else if (keyCode === ESCAPE && gameState === "game") {
         gameState = "title";
     }
-    //sets the gamemode to multiplayer
 
+    //sets the gamemode to multiplayer
     if (keyCode === UP_ARROW && frogB.tongue.state === "idle" && gameState === "game2") {
         frogB.tongue.state = "outbound";
     } else if (keyCode === 77 && gameState === "gamemodes") {
@@ -1526,6 +1653,7 @@ function keyPressed() {
         victB = 0;
     }
 
+    //sets the gamemode to player fly
     if (keyCode === 70 && gameState === "gamemodes") {
         gameState = "pFlyInstructions";
     } else if (keyCode === ENTER && gameState === "pFlyInstructions") {
@@ -1539,6 +1667,16 @@ function keyPressed() {
     }
 
 
+    //sets the game mode to Kill the fly
+    if (keyCode === 75 && gameState === "gamemodes") {
+        gameState = "killInstructions";
+    } else if (keyCode === ENTER && gameState === "killInstructions") {
+        gameState = "game4";
+    } else if (keyCode === ESCAPE && gameState === "game4") {
+        gameState = "gamemodes";
+    } else if (keyCode === ESCAPE && gameState === "killInstructions") {
+        gameState = "gamemodes";
+    }
 
     //Navigate through the scores and instructions
     if (keyCode === SHIFT && gameState === "singleInstructions") {
